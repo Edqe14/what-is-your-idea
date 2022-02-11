@@ -1,14 +1,12 @@
-import { randomEntry } from './lib/utils';
-
 export const Public = {
   engine: 'text-davinci-001',
   configuration: {
     stop: 'AI:',
-    temperature: 0.6,
-    max_tokens: 75,
+    temperature: 0.8,
+    max_tokens: 80,
     top_p: 1,
     frequency_penalty: 0.75,
-    presence_penalty: 0,
+    presence_penalty: 0.5,
   },
   maxSuggestions: 1,
   suggestionQuestions: [
@@ -20,14 +18,17 @@ export const Public = {
 
 export const Private = {
   prompts: {
-    askForSuggestion(input = '') {
-      return `Human: ${randomEntry(Public.suggestionQuestions)}\n${Public.configuration.stop} ${input}`.trim();
+    askForSuggestion(input = '', index = 0) {
+      const fixedIndex = !Public.suggestionQuestions[index] ? index % Public.suggestionQuestions.length : index;
+      const question = Public.suggestionQuestions[fixedIndex];
+
+      return `Human: ${question}\n${Public.configuration.stop} ${input}`.trim();
     },
     ask(input: string) {
       return `Human: What do you think about an idea "${input}"?\n${Public.configuration.stop}`;
     },
     suggestion(input: string, originalResponse: string, existingSuggestions: string[] = []) {
-      const existing = existingSuggestions.map((inp) => this.askForSuggestion(inp));
+      const existing = existingSuggestions.map((inp, index) => this.askForSuggestion(inp, index + 1));
 
       return `${`${this.ask(input)} ${originalResponse}\n${existing.join('\n')}`.trim()}\n${this.askForSuggestion()}`;
     }
