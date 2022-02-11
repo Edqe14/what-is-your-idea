@@ -1,15 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Models, AI } from '@/lib';
-import config, { Public } from '@/config';
+import config from '@/config';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === 'GET') {
-    return res.status(200).json(Public);
-  }
-
   if (req.method === 'POST') {
     const { input } = req.body;
     if (!input) {
@@ -22,7 +18,7 @@ export default async function handler(
     const prompt = config.prompts.ask(input);
     const response = await AI.createCompletion(config.engine, {
       prompt,
-      ...Public.configuration
+      ...config.configuration
     });
 
     const { model, choices } = response.data;
