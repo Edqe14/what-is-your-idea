@@ -1,7 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Models, AI } from '@/lib';
-import config from '@/config';
-import { IHistory } from '@/lib/model/history';
+import { Models } from '@/lib';
 import { transformId } from '@/lib/utils';
 
 export default async function handler(
