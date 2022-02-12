@@ -1,3 +1,5 @@
+import { randomEntry } from './lib/utils';
+
 export const Public = {
   engine: 'text-davinci-001',
   configuration: {
@@ -12,25 +14,24 @@ export const Public = {
   suggestionQuestions: [
     'Do you have some suggestion about it?',
     'Can you give me some advice related to it?',
-    'Do you have some ideas that is similar to it?'
+    'Do you have some ideas that is similar to it?',
+    'Is there some possible suggestion about it?'
   ]
 };
 
 export const Private = {
   prompts: {
-    askForSuggestion(input = '', index = 0) {
-      const fixedIndex = !Public.suggestionQuestions[index] ? index % Public.suggestionQuestions.length : index;
-      const question = Public.suggestionQuestions[fixedIndex];
-
-      return `Human: ${question}\n${Public.configuration.stop} ${input}`.trim();
+    askForSuggestion(input = '') {
+      return `Human: ${randomEntry(Public.suggestionQuestions)}\n${Public.configuration.stop} ${input}`.trim();
     },
     ask(input: string) {
       return `Human: What do you think about an idea "${input}"?\n${Public.configuration.stop}`;
     },
     suggestion(input: string, originalResponse: string, existingSuggestions: string[] = []) {
-      const existing = existingSuggestions.map((inp, index) => this.askForSuggestion(inp, index + 1));
+      const existing = existingSuggestions.map((inp) => this.askForSuggestion(inp));
+      const concat = `${this.ask(input)} ${originalResponse}\n${existing.join('\n')}`.trim();
 
-      return `${`${this.ask(input)} ${originalResponse}\n${existing.join('\n')}`.trim()}\n${this.askForSuggestion()}`;
+      return `${concat}\n${this.askForSuggestion()}`;
     }
   }
 };
