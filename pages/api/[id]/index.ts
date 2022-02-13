@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Models } from '@/lib';
+import { Models, rateLimited } from '@/lib';
 import { transformId } from '@/lib/utils';
 
 export default async function handler(
@@ -7,6 +7,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method !== 'GET') return;
+  if (await rateLimited(req, res)) return;
 
   const { id } = req.query;
   if (!id) {

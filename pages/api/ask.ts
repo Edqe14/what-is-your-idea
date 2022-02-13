@@ -1,11 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Models, AI } from '@/lib';
+import { Models, AI, rateLimited } from '@/lib';
 import config from '@/config';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  if (await rateLimited(req, res)) return;
+
   if (req.method === 'POST') {
     const { input } = req.body;
     if (!input) {

@@ -1,13 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Models, AI } from '@/lib';
+import { Models, AI, rateLimited } from '@/lib';
 import config from '@/config';
-import { IHistory } from '@/lib/model/history';
+import { IHistory } from '@/lib/database/model/history';
 import { transformId } from '@/lib/utils';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  if (await rateLimited(req, res)) return;
+
   const { id } = req.query;
   if (!id) {
     return res.status(400).json({
