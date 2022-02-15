@@ -5,6 +5,7 @@ export interface IHistory extends Document {
   model: string;
   input: string;
   response: string;
+  timestamp: number;
 }
 
 const schema = new Schema<IHistory>({
@@ -21,6 +22,10 @@ const schema = new Schema<IHistory>({
   response: {
     type: String,
     required: true,
+  },
+  timestamp: {
+    type: Number,
+    default: () => Date.now()
   }
 });
 

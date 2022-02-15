@@ -5,6 +5,7 @@ interface ISuggestion extends Document {
   parentId: ObjectId;
   response: string;
   prompt: string;
+  timestamp: number;
 }
 
 const schema = new Schema<ISuggestion>({
@@ -20,6 +21,10 @@ const schema = new Schema<ISuggestion>({
   response: {
     type: String,
     required: true,
+  },
+  timestamp: {
+    type: Number,
+    default: () => Date.now()
   }
 });
 
