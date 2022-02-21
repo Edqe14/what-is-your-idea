@@ -9,7 +9,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
       onExitComplete={() => window.scrollTo(0, 0)}
       initial={false}
     >
-      <Component {...pageProps} key={router.route} canonical={router.route} />
+      <Component {...pageProps} key={router.route} />
     </AnimatePresence>
   );
 }
