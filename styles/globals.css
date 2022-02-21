@@ -5,5 +5,5 @@
 @tailwind utilities;
 
 body {
-  @apply font-spartan;
+  @apply font-spartan bg-white dark:bg-black overflow-x-hidden text-black dark:text-white;
 }
