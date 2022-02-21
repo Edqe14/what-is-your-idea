@@ -1,11 +1,22 @@
 import type { AppProps } from 'next/app';
 import { AnimatePresence } from 'framer-motion';
-import '@/styles/globals.css';
 import { useEffect, createRef, useState } from 'react';
 import ZigZag from '@/components/ZigZag';
 
+import '@/styles/globals.css';
+
 function MyApp({ Component, pageProps, router }: AppProps) {
   const [darkMode, setDarkMode] = useState(true);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.theme = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.theme = 'light';
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     // On page load or when changing themes, best to add inline in `head` to avoid FOUC
@@ -16,19 +27,9 @@ function MyApp({ Component, pageProps, router }: AppProps) {
     }
   }, []);
 
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
-
   const zigzag = createRef<SVGSVGElement>();
   useEffect(() => {
-    const whole = (zigzag.current?.clientWidth ?? 0);
-    const half = whole / 2;
-    const multiplier = 0.1;
+    const multiplier = 0.05;
     let last = 0;
     let pos = 0;
 
@@ -37,23 +38,33 @@ function MyApp({ Component, pageProps, router }: AppProps) {
       if (!current) return;
 
       const { scrollY } = window;
+      const { left, right } = current.getBoundingClientRect();
       const speed = last - scrollY;
 
-      if (pos > 0) pos -= half / 2;
-      if (pos < half * -1) pos += half;
+      if (left >= 0) pos = (window.innerWidth / 2) * -1;
+      if (right <= window.innerWidth) pos = 0;
       pos -= speed * multiplier;
-      console.log(pos, half);
-
-      current.style.transform = `translate3d(${pos}px, ${scrollY}px, 0)`;
-
       last = scrollY;
     };
 
     handler();
     window.addEventListener('scroll', handler);
 
+    let id: number | null = null;
+    const update = () => {
+      const { current } = zigzag;
+      const { scrollY } = window;
+      if (!current) return;
+
+      current.style.transform = `translate3d(${pos}px, ${scrollY}px, 0)`;
+      id = requestAnimationFrame(update);
+    };
+
+    update();
+
     return () => {
       window.removeEventListener('scroll', handler);
+      cancelAnimationFrame(id as number);
     };
   }, [zigzag]);
 
@@ -64,7 +75,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
         onExitComplete={() => window.scrollTo(0, 0)}
         initial={false}
       >
-        <Component {...pageProps} key={router.route} />
+        <Component {...pageProps} key={router.route} darkMode={darkMode} setDarkMode={setDarkMode} />
       </AnimatePresence>
 
       <ZigZag ref={zigzag} className="h-screen py-4 absolute top-0 left-0 -z-10 pointer-events-none" />
